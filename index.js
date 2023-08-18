@@ -28,13 +28,22 @@ app.post('/', async (req, res) => {
 app.get('/posts/:id', async (req, res) => {
   const { id } = req.params
 
-  const { data } = await axios.get(
+  const cachedPost = await client.get(`post-${id}`)
+  if (cachedPost) {
+    return res.json(JSON.parse(cachedPost))
+  }
+
+  const response = await axios.get(
     `https://jsonplaceholder.typicode.com/posts/${id}`
   )
+  await client.set(`post-${id}`, JSON.stringify(response.data), 'EX', 10)
 
-  // console.log(data)
+  // const string = JSON.stringify(response.data)
+  // console.log(string)
+  // const parse = JSON.parse(string)
+  // console.log(parse)
 
-  res.json(data)
+  return res.json(response.data)
 })
 
 client.connect().then(() => {
