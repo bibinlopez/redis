@@ -1,7 +1,7 @@
 const express = require('express')
 const redis = require('redis')
-
 const utils = require('util')
+const axios = require('axios')
 
 const redisUrl = 'redis://127.0.0.1:6379'
 const client = redis.createClient()
@@ -19,14 +19,22 @@ app.post('/', async (req, res) => {
   res.json(response)
 })
 
-app.get('/', async (req, res) => {
-  const { key } = req.body
-  const value = await client.get(key)
-  res.json(value)
-})
+// app.get('/', async (req, res) => {
+//   const { key } = req.body
+//   const value = await client.get(key)
+//   res.json(value)
+// })
 
 app.get('/posts/:id', async (req, res) => {
   const { id } = req.params
+
+  const { data } = await axios.get(
+    `https://jsonplaceholder.typicode.com/posts/${id}`
+  )
+
+  // console.log(data)
+
+  res.json(data)
 })
 
 client.connect().then(() => {
